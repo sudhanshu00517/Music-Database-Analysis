@@ -56,7 +56,7 @@ WHERE IL.TRACK_ID IN (
 )
 ORDER BY C.EMAIL;
 
-2. Let's invite the artists who have written the most rock music in our dataset. Write a
+2. Lets invite the artists who have written the most rock music in our dataset. Write a
 query that returns the Artist name and total track count of the top 10 rock bands
 
 SELECT artist.artist_id, artist.name, COUNT(track.track_id) AS number_of_songs

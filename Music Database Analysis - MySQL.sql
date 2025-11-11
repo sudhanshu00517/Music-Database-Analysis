@@ -153,34 +153,33 @@ country. Write a query that returns the country along with the top customer and 
 much they spent. For countries where the top amount spent is shared, provide all
 customers who spent this amount
 
-WITH sales_per_country AS (
+WITH customer_spending AS (
     SELECT 
-        customer.country, 
-        genre.name AS genre_name, 
-        COUNT(invoice_line.quantity) AS purchases_per_genre
-    FROM invoice_line
-    JOIN invoice ON invoice.invoice_id = invoice_line.invoice_id
-    JOIN customer ON customer.customer_id = invoice.customer_id
-    JOIN track ON track.track_id = invoice_line.track_id
-    JOIN genre ON genre.genre_id = track.genre_id
-    GROUP BY customer.country, genre.name
+        c.country,
+        c.customer_id,
+        c.first_name,
+        c.last_name,
+        SUM(i.total) AS total_spent
+    FROM customer c
+    JOIN invoice i ON c.customer_id = i.customer_id
+    GROUP BY c.country, c.customer_id, c.first_name, c.last_name
 ),
-max_genre_per_country AS (
+max_spending_per_country AS (
     SELECT 
-        country, 
-        MAX(purchases_per_genre) AS max_genre_number
-    FROM sales_per_country
+        country,
+        MAX(total_spent) AS max_spent
+    FROM customer_spending
     GROUP BY country
 )
 SELECT 
-    spc.country, 
-    spc.genre_name, 
-    spc.purchases_per_genre
-FROM sales_per_country spc
-JOIN max_genre_per_country mgpc
-    ON spc.country = mgpc.country
-    AND spc.purchases_per_genre = mgpc.max_genre_number
-ORDER BY spc.country, spc.genre_name;
+    cs.country,
+    cs.first_name,
+    cs.last_name,
+    cs.total_spent
+FROM customer_spending cs
+JOIN max_spending_per_country mspc
+    ON cs.country = mspc.country AND cs.total_spent = mspc.max_spent
+ORDER BY cs.country;
 
 
 
